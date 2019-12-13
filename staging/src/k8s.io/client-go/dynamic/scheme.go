@@ -23,6 +23,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/schema"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 	"k8s.io/apimachinery/pkg/runtime/serializer/json"
+	"k8s.io/apimachinery/pkg/runtime/serializer/protobuf"
 )
 
 var watchScheme = runtime.NewScheme()
@@ -57,6 +58,16 @@ func (s basicNegotiatedSerializer) SupportedMediaTypes() []runtime.SerializerInf
 				EncodesAsText: true,
 				Serializer:    json.NewSerializer(json.DefaultMetaFactory, basicScheme, basicScheme, false),
 				Framer:        json.Framer,
+			},
+		},
+		{
+			MediaType:        "application/vnd.kubernetes.protobuf",
+			MediaTypeType:    "application",
+			MediaTypeSubType: "vnd.kubernetes.protobuf",
+			Serializer:       protobuf.NewSerializer(unstructuredCreater{basicScheme}, unstructuredTyper{basicScheme}),
+			StreamSerializer: &runtime.StreamSerializerInfo{
+				Serializer: protobuf.NewRawSerializer(unstructuredCreater{basicScheme}, unstructuredTyper{basicScheme}),
+				Framer:     protobuf.LengthDelimitedFramer,
 			},
 		},
 	}
