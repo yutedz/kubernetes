@@ -147,7 +147,7 @@ func (c *Controller) Start() {
 
 	// Reconcile during first run removing itself until server is ready.
 	endpointPorts := createEndpointPortSpec(c.PublicServicePort, "https", c.ExtraEndpointPorts)
-	if err := c.EndpointReconciler.RemoveEndpoints(kubernetesServiceName, c.PublicIP, endpointPorts); err != nil {
+	if err := c.EndpointReconciler.RemoveEndpoints(kubernetesServiceName, c.PublicIP, endpointPorts); err != nil && !errors.IsNotFound(err) {
 		klog.Errorf("Unable to remove old endpoints from kubernetes service: %v", err)
 	}
 
